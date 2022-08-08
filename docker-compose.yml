@@ -5,6 +5,8 @@ services:
     image: postgres:11
     container_name: auth-db
     restart: always
+    networks:
+      - sales-network
     environment:
       - POSTGRES_DB=auth-db
       - POSTGRES_USER=admin
@@ -16,6 +18,8 @@ services:
     image: postgres:11
     container_name: product-db
     restart: always
+    networks:
+      - sales-network
     environment:
       - POSTGRES_DB=product-db
       - POSTGRES_USER=admin
@@ -27,6 +31,8 @@ services:
     image: mongo
     container_name: sales-db
     restart: always
+    networks:
+      - sales-network
     environment:
       - MONGODB_DATABASE=sales-db
       - MONGODB_USER=admin
@@ -37,7 +43,11 @@ services:
 
   auth-api:
     build: ./auth-api
+    depends_on:
+      - auth-db
     container_name: auth-api
+    networks:
+      - sales-network
     environment:
       - PORT=8080
     ports:
@@ -46,6 +56,8 @@ services:
   product-api:
     build: ./product-api
     container_name: product-api
+    networks:
+      - sales-network
     environment:
       - PORT=8081
     ports:
@@ -54,6 +66,8 @@ services:
   sales-api:
     build: ./sales-api
     container_name: sales-api
+    networks:
+      - sales-network
     environment:
       - PORT=8082
     ports:
@@ -66,3 +80,7 @@ services:
       - 5672:5672
       - 25676:25676
       - 15672:15672
+
+networks:
+  sales-network:
+    driver: bridge
