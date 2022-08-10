@@ -11,9 +11,11 @@ class UserService {
     async findByEmail(req) {
         try {
             const { email } = req.params;
+            const { authUser } = req;
             this.validateRequestData(email);
             let user = await UserRepository.findByEmail(email);
             this.validadeUserNotFound(user);
+            this.validadeAuthenticatedUser(user, authUser);
             return {
                 status: httpStatus.SUCCESS,
                 user: {
@@ -34,7 +36,7 @@ class UserService {
         if(!email) {
             throw new UserException(
                 httpStatus.BAD_REQUEST,
-                "User email was not informed"
+                "User email was not informed."
             );
         }
     }
@@ -43,7 +45,16 @@ class UserService {
         if(!user) {
             throw new UserException(
                 httpStatus.BAD_REQUEST,
-                "User was not found"
+                "User was not found."
+            );
+        }
+    }
+
+    validadeAuthenticatedUser(user, authUser){
+        if (!authUser || user.id !== authUser.id) {
+            throw new UserException(
+                httpStatus.UNAUTHORIZED,
+                "You cannot see this user data."
             );
         }
     }
